@@ -308,6 +308,8 @@ void runConnectionManagerScreen() async {
 bool _isCmReadyToShow = false;
 
 showCmWindow({bool isStartup = false}) async {
+  // 完全禁止显示 CM 窗口
+  return;
   if (isStartup) {
     WindowOptions windowOptions = getHiddenTitleBarWindowOptions(
         size: kConnectionManagerWindowSizeClosedChat, alwaysOnTop: true);
@@ -338,12 +340,19 @@ hideCmWindow({bool isStartup = false}) async {
   if (isStartup) {
     WindowOptions windowOptions = getHiddenTitleBarWindowOptions(
         size: kConnectionManagerWindowSizeClosedChat);
+    windowManager.setOpacity(0);
     await windowManager.waitUntilReadyToShow(windowOptions, null);
     bind.mainHideDock();
-    await windowManager.hide();  // 直接隐藏，不经过 setOpacity 和 minimize
+    await windowManager.minimize();
+    await windowManager.hide();
     _isCmReadyToShow = true;
   } else if (_isCmReadyToShow) {
-    await windowManager.hide();  // 直接隐藏
+    if (await windowManager.getOpacity() != 0) {
+      await windowManager.setOpacity(0);
+      bind.mainHideDock();
+      await windowManager.minimize();
+      await windowManager.hide();
+    }
   }
 }
 
