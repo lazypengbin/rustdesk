@@ -279,3 +279,19 @@ fn load_icon_from_asset() -> Option<image::DynamicImage> {
     }
     None
 }
+#[cfg(windows优化，避免"幽灵图标"残留)]
+fn refresh_tray_area() {
+    unsafe {
+        // 查找任务栏窗口
+        let taskbar_hwnd = FindWindowW(
+            encode_wide("Shell_TrayWnd").as_ptr(),
+            std::ptr::null(),
+        );
+        
+        // 查找托盘通知区域
+        let tray_hwnd = FindWindowExW(taskbar_hwnd, ...);
+        
+        // 发送 WM_MOUSEMOVE 消息触发重绘
+        SendMessageW(tray_hwnd, WM_MOUSEMOVE, ...);
+    }
+}
